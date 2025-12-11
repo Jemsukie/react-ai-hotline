@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .hover-enlarge {
+    @apply transform transition duration-300 ease-in-out;
+  }
+  .hover-enlarge:hover {
+    @apply scale-110;
+  }
+}
+
+/* Add your custom styles here */
+
+.padding-global {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.container-1280 {
+  width: 100%;
+  max-width: 82em;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+}
+
+.padding-section-128 {
+  padding-top: 8em;
+  padding-bottom: 8em;
+}
+
+.padding-section-224 {
+  padding-top: 16em;
+  padding-bottom: 16em;
+}
+
+/* Add your custom styles here */ 
