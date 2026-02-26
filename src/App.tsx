@@ -12,10 +12,13 @@ function App() {
   const mediaStreamRef = useRef<MediaStream | null>(null)
   const audioElementRef = useRef<HTMLAudioElement | null>(null)
 
+  // API base URL: set in .env as REACT_APP_API_BASE_URL.
+  // Leave empty/unset when app is served from same host as API (e.g. Docker at :4000) to avoid CORS.
+  const apiBaseUrl = process.env.REACT_APP_API_BASE_URL ?? ''
+
   // Check backend health on mount and periodically
   useEffect(() => {
     const checkBackend = async () => {
-      const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000'
       try {
         const response = await fetch(`${apiBaseUrl}/health`, {
           method: 'GET',
@@ -38,7 +41,7 @@ function App() {
     const interval = setInterval(checkBackend, 5000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [apiBaseUrl])
 
   const startCall = async () => {
     try {
@@ -50,8 +53,7 @@ function App() {
 
       setStatus('Creating Retell session...')
 
-      // Start Retell session via backend API
-      const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:4000'
+      // Start Retell session via backend API (same baseURL as health check)
       const response = await fetch(`${apiBaseUrl}/api/retell/start`, {
         method: 'POST',
         headers: {
