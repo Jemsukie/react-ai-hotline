@@ -1,0 +1,67 @@
+# Nginx configuration for hotline.jemwealth.co
+# Place this file in /etc/nginx/sites-available/hotline.jemwealth.co
+# Then enable with: sudo ln -s /etc/nginx/sites-available/hotline.jemwealth.co /etc/nginx/sites-enabled/
+
+# HTTP Server (for initial setup and Let's Encrypt verification)
+server {
+    listen 80;
+    listen [::]:80;
+    server_name hotline.jemwealth.co;
+    
+    # For Let's Encrypt verification
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
+    
+    # Root directory for React app
+    root /var/www/ai-hotline/build;
+    index index.html;
+
+    # Serve React app (SPA routing)
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # API Proxy to Backend (keeps /api prefix)
+    location /api/ {
+        proxy_pass http://localhost:4000;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+        
+        # Timeouts for long-running requests
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+
+    # Health check endpoint (also accessible via /api/health)
+    location /health {
+        proxy_pass http://localhost:4000/health;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+    
+    # Also handle /api/health to map to /health
+    location = /api/health {
+        proxy_pass http://localhost:4000/health;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+    }
+
+    # Static assets caching
+    location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+
+# HTTPS Server
+# NOTE: This block will be automatically created by Certbot
+# Run: sudo certbot --nginx -d hotline.jemwealth.co
+# Certbot will create the HTTPS server block with SSL configuration
+
+
